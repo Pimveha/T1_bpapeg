@@ -10,19 +10,18 @@ class mRNA_py:
         self.fasta_dict = fasta_dict
         self.organism = organism or self.set_organism()
 
-    def make_blast_xml(self):
-        # input_str = f"{list(self.fasta_dict.keys())[0]}\n{list(self.fasta_dict.values())[0]}"
+    def make_blastn_xml(self) -> None:
         input_str = (list(self.fasta_dict.values())[0])
         result_handle = NCBIWWW.qblast("blastn", "nt", input_str, hitlist_size=1)
-        with open("xml_out.xml", "w") as out_handle: 
+        with open("NCBIWWW_blastn_out.xml", "w") as out_handle: 
             out_handle.write(result_handle.read())
             out_handle.close()
 
     def set_organism(self) -> None:
-        my_file = Path("./xml_out.xml")
+        my_file = Path("./NCBIWWW_blastn_out.xml")
         if not my_file.exists():
-            self.make_xml()
-        with open("xml_out.xml", "r") as f:
+            self.make_blastn_xml()
+        with open("NCBIWWW_blastn_out.xml", "r") as f:
             xml_read_list = f.readlines()
         for line in xml_read_list:
             if "PREDICTED:" in line:
@@ -52,7 +51,6 @@ class mRNA_py:
         return self.seq_len_dict
 
 
-
 def read_fasta_file(file_name: str) -> dict:
     fasta_dict = {}
     with open(file_name) as f_read:
@@ -68,4 +66,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
