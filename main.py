@@ -32,6 +32,27 @@ class mRNA_py:
     def get_organism(self) -> str:
         return self.organism
 
+    def get_organism_proteoom(self):
+        # 
+        url = f'https://ftp.ensembl.org/pub/release-108/fasta/{(self.organism).replace(" ", "_").lower()}/pep/'
+        # print(url)
+        r = requests.get(url)
+        # print(r.status_code())
+        for line in r.text.split():
+            if ".all.fa.gz" in line:
+                sub_url = line.split('"')[1]
+
+                print(sub_url)
+
+        # bashCommand = f"{url}{sub_url}"
+        bashCommand = f"mkdir proteoom"
+        print(bashCommand)
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        print(output)
+
+        # return (r.text)
+
     def set_cg_fract_dict(self) -> None:
         cg_fract_dict = {}
         for k, v in self.fasta_dict.items():
@@ -60,8 +81,10 @@ def read_fasta_file(file_name: str) -> dict:
 
 def main():
     fasta_dict = read_fasta_file("T1.fa")
+    # fasta_dict = read_fasta_file("T1.fa")
     inf1 = mRNA_py(fasta_dict)
     print(inf1.get_organism())
+    print(inf1.get_organism_proteoom())
     
 
 if __name__ == '__main__':
