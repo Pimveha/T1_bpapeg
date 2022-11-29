@@ -1,4 +1,5 @@
 from Bio import SeqIO
+from Bio.Seq import Seq
 from Bio.Blast import NCBIWWW, NCBIXML
 import requests
 import os
@@ -45,31 +46,62 @@ class mRNA_py:
                 print(sub_url)
 
         # bashCommand = f"{url}{sub_url}"
-        bashCommand = f"mkdir proteoom"
-        print(bashCommand)
-        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        print(output)
+        # bashCommand = f"mkdir proteoom"
+        # print(bashCommand)
+        # process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        # output, error = process.communicate()
+        # print(output)
+        return f"{url}{sub_url}"
 
         # return (r.text)
 
-    def set_cg_fract_dict(self) -> None:
+    def cg_fract_dict(self) -> dict:
         cg_fract_dict = {}
         for k, v in self.fasta_dict.items():
             cg_perc_dict[k] = (v.count("C") + v.count("G"))/len(v)
-        self.cg_fract_dict = cg_fract_dict
+        # self.cg_fract_dict = cg_fract_dict
+        return cg_fract_dict
 
-    def get_cg_fract_dict(self) -> dict:
-        return self.cg_fract_dict
-
-    def set_seq_len_dict(self) -> None:
+    def seq_len_dict(self) -> dict:
         seq_len_dict = {}
         for k, v in self.fasta_dict.items():
             seq_len_dict[k] = len(v)
-        self.seq_len_dict = seq_len_dict
+        # self.seq_len_dict = seq_len_dict
+        return seq_len_dict
 
-    def get_seq_len_dict(self) -> dict:
-        return self.seq_len_dict
+    def protein_dict(self) -> dict:
+        protein_dict = {}
+        for k, v in self.fasta_dict.items():
+            # protein_dict[k] = v.translate()
+            # print(v.translate(to_stop=True))
+            # print(k, v.translate())
+            # not sure if it makes sense to check different reading frames
+            frame_list = [v.translate(), v[1:].translate(), v[2:].translate()]
+            frame_list.sort(key=lambda x:x.count("*"))
+            best_frame = frame_list[0]
+            split_frame = best_frame.split("*")
+            split_frame.sort(key=lambda x:len(x), reverse=True)
+            # print(k, split_frame[0])
+            protein_dict[k] = split_frame[0]
+            # print(f"{k}:\n {v.translate()}\n {v[1:].translate()}\n {v[2:].translate()}\n\n")
+        return protein_dict
+
+    def match_mrna_protein(self) -> dict:
+        protein_dict = self.protein_dict()
+        subprocess.call(f'bash alter_fasta.sh {"_".join(self.organism.split(" "))}', shell=True)
+        print("files were created")
+        with open(f'{"_".join(self.organism.split(" "))}.ensembl.fa', 'r') as f:
+        # with open(f'{"_".join(self.organism.split(" "))}.uniprot.fa', 'r') as f:
+            file_list = f.read().split("\n")
+        # print(file_list)
+        match_dict = {}
+        for k, v in protein_dict.items():
+            for line in file_list:
+                if str(v) in line:
+                    match_dict[k] = line
+        return match_dict
+        # prot = rna.translate(to_stop=True)
+
 
 
 def read_fasta_file(file_name: str) -> dict:
@@ -85,7 +117,10 @@ def main():
     inf1 = mRNA_py(fasta_dict)
     print(inf1.get_organism())
     print(inf1.get_organism_proteoom())
+    # print(inf1.protein_dict())
+    print(inf1.match_mrna_protein())
     
 
 if __name__ == '__main__':
     main()
+
