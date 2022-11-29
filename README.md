@@ -4,6 +4,6 @@ mRNA brokstukken -> organisme -> proteoom + eiwitten -> verbanden tussen eiwitte
 ----------------
 tijdelijk handmatig het proteoom gedownload:
 
-ensembl: Ornithorhynchus_anatinus.mOrnAna1.p.v1.pep.all.fa
+- ensembl: `Ornithorhynchus_anatinus.mOrnAna1.p.v1.pep.all.fa`
 
-uniprot: UP000002279_9258.fasta
+- uniprot: `UP000002279_9258.fasta`
