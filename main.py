@@ -1,10 +1,18 @@
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Blast import NCBIWWW, NCBIXML
+from Bio import Entrez
 import requests
 import os
 import subprocess
 from pathlib import Path
+from collections import defaultdict
+import json
+
+#change to input
+Entrez.email = "vanhelvoortpim@gmail.com"
+# Entrez.email = input("mail: ")
+
 
 class mRNA_py:
     def __init__(self, fasta_dict: dict, organism: str = None) -> None:
@@ -90,8 +98,8 @@ class mRNA_py:
         protein_dict = self.protein_dict()
         subprocess.call(f'bash alter_fasta.sh {"_".join(self.organism.split(" "))}', shell=True)
         print("files were created")
-        with open(f'{"_".join(self.organism.split(" "))}.ensembl.fa', 'r') as f:
-        # with open(f'{"_".join(self.organism.split(" "))}.uniprot.fa', 'r') as f:
+        # with open(f'{"_".join(self.organism.split(" "))}.ensembl.fa', 'r') as f:
+        with open(f'{"_".join(self.organism.split(" "))}.uniprot.fa', 'r') as f:
             file_list = f.read().split("\n")
         # print(file_list)
         match_dict = {}
@@ -101,6 +109,83 @@ class mRNA_py:
                     match_dict[k] = line
         return match_dict
         # prot = rna.translate(to_stop=True)
+
+    def gene_id_to_proteins(self) -> dict:
+        # gene_id_info_dict = defaultdict(dict)
+        gene_id_info_dict = defaultdict(lambda: defaultdict(set))
+        # todo: getting gene ID's needs to be incorperated into main
+        with open("gene_ids", "r") as f:
+            gene_id_list = f.read().split("\n")
+        for gene_id in gene_id_list:
+            # might raise errors?:
+            handle = Entrez.efetch(db="protein", id=gene_id, rettype="gp")
+            geneinfo_list = handle.read().split("\n")
+            NCBI_gene_id_found = False
+            for info in geneinfo_list:
+
+                if "chromosome" in info:
+                    chrom_num = info.strip().split("=")[1].strip("\"")  
+                    gene_id_info_dict[gene_id]["Chromosome"].add(chrom_num)
+
+                if "/db_xref=\"GeneID:" in info:
+                    NCBI_gene_id = info.strip().split(":")[1].strip("\"")
+                    gene_id_info_dict[gene_id]["NCBI gene id"].add(NCBI_gene_id)
+                    NCBI_gene_id_found = True
+
+                if "sex" in info:
+                    sex_ = info.strip().split("=")[1].strip("\"")  
+                    gene_id_info_dict[gene_id]["Sex"].add(sex_)
+
+                if "tissue_type" in info:
+                    tissue_type = info.strip().split("=")[1].strip("\"")
+                    gene_id_info_dict[gene_id]["Tissue type"].add(tissue_type)
+
+                if "/product" in info:
+                    protein = info.split("=")[1].strip().strip("\"")  
+                    gene_id_info_dict[gene_id]["Protein"].add(protein)
+
+                if "/calculated_mol_wt" in info:
+                    mol_wt = info.strip().split("=")[1].strip("\"")
+                    gene_id_info_dict[gene_id]["mol weight"].add(mol_wt)
+
+                if "/site_type" in info:
+                    site_type = info.strip().split("=")[1].strip("\"")
+                    gene_id_info_dict[gene_id]["site type"].add(site_type)
+
+
+
+
+            print(gene_id_info_dict[gene_id])
+
+            # maybe create a new method for this?
+            while NCBI_gene_id_found:
+                try:
+                    handle = Entrez.efetch(db="gene", id=NCBI_gene_id, rettype="gene_table", format="xml")
+                    record = Entrez.read(handle)
+                    NCBI_gene_id_found = 0
+                except Exception as e:
+                    print(e)
+                    continue
+
+            for x in record:
+                try:
+                    for i in x["Entrezgene_comments"][1]["Gene-commentary_comment"][0]["Gene-commentary_products"][0]["Gene-commentary_products"]:
+                        isoform = i["Gene-commentary_products"][0]["Gene-commentary_source"][0]["Other-source_post-text"]
+                        print(isoform)
+                        gene_id_info_dict[gene_id]["Protein_isoforms"].add(isoform)
+                except:
+                    for i in x["Entrezgene_comments"][2]["Gene-commentary_comment"][0]["Gene-commentary_products"][0]["Gene-commentary_products"]:
+                        isoform = i["Gene-commentary_products"][0]["Gene-commentary_source"][0]["Other-source_post-text"]
+                        print(isoform)
+                        gene_id_info_dict[gene_id]["Protein_isoforms"].add(isoform)
+
+
+        # print(gene_id_info_dict)
+        # print(gene_id_info_dict.keys())
+        # print(gene_id_info_dict["XP_007655542"])
+        print(json.dumps(gene_id_info_dict, indent=2, default=tuple))
+        return gene_id_info_dict
+
 
 
 
@@ -119,8 +204,10 @@ def main():
     print(inf1.get_organism_proteoom())
     # print(inf1.protein_dict())
     print(inf1.match_mrna_protein())
+    inf1.gene_id_to_proteins()
+
+    # print(inf1.gene_id_to_proteins())
     
 
 if __name__ == '__main__':
     main()
-
