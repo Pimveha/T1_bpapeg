@@ -56,16 +56,16 @@ def appender(connection):
             (row[0], row[1]))
 
             cur.execute("""
-            INSERT INTO eiwit ("eiwit_id", eiwit_naam, gen_id, chromosome, eiwit_lengte) 
-            VALUES (%s, %s, %s, %s, %s) ON CONFLICT (eiwit_id) DO NOTHING;
+            INSERT INTO eiwit (eiwit_id, eiwit_naam, gen_id, chromosome, eiwit_lengte, sex_org, location_in_org) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (eiwit_id) DO NOTHING;
             """,
-            (row[3], row[4], row[0], row[2], row[5]))   
+            (row[3], row[4], row[0], row[2], row[5] ,row[6], row[7]))   
 
             cur.execute("""
             INSERT INTO mrna_brokstukken ("seq_id", "eiwit_id", sequentie_len ,sequentie) 
             VALUES (%s, %s, %s, %s) ON CONFLICT (seq_id) DO NOTHING;
             """,
-            (count, row[3], int(row[6]), row[7].strip()))   
+            (count, row[3], int(row[8]), row[9].strip()))   
 
             ec_getter(connection, row)
 
