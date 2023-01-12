@@ -1,3 +1,4 @@
+1:
 WITH eiwit_chromosomes AS (
     SELECT chromosome, COUNT(chromosome) as count
     FROM eiwit
@@ -19,6 +20,7 @@ UNION
 SELECT 'mrna_brokstukken' as table, chromosome, count as most_occuring  FROM mrna_chromosomes
 ORDER BY most_occuring DESC;
 
+2:
 SELECT gen.gen_name, COUNT(eiwit.gen_id) as count 
 FROM eiwit 
 JOIN gen ON eiwit.gen_id = gen.gen_id 
@@ -26,3 +28,13 @@ GROUP BY gen.gen_name
 ORDER BY count DESC 
 LIMIT 1; 
 
+3:
+SELECT 
+    (SELECT AVG(eiwit_lengte)
+     FROM eiwit
+     WHERE EXISTS (SELECT eiwit_id FROM mrna_brokstukken WHERE mrna_brokstukken.eiwit_id = eiwit.eiwit_id)
+    ) AS "Gemiddelde lengte eiwitten uit mrna_brokstukken",
+    (SELECT AVG(eiwit_lengte)
+     FROM eiwit
+     WHERE NOT EXISTS (SELECT eiwit_id FROM mrna_brokstukken WHERE mrna_brokstukken.eiwit_id = eiwit.eiwit_id)
+    ) AS "Gemiddelde lengte eiwitten buiten mrna_brokstukken";
