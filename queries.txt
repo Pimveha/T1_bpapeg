@@ -1,0 +1,28 @@
+WITH eiwit_chromosomes AS (
+    SELECT chromosome, COUNT(chromosome) as count
+    FROM eiwit
+    WHERE chromosome is not null
+    GROUP BY chromosome
+    ORDER BY count DESC
+    LIMIT 3
+), mrna_chromosomes AS (
+    SELECT eiwit.chromosome, COUNT(eiwit.chromosome) as count
+    FROM mrna_brokstukken
+    JOIN eiwit ON mrna_brokstukken.eiwit_id = eiwit.eiwit_id
+    WHERE eiwit.chromosome is not null
+    GROUP BY eiwit.chromosome
+    ORDER BY count DESC
+    LIMIT 3
+)
+SELECT 'eiwit' as table, chromosome, count as most_occuring FROM eiwit_chromosomes
+UNION
+SELECT 'mrna_brokstukken' as table, chromosome, count as most_occuring  FROM mrna_chromosomes
+ORDER BY most_occuring DESC;
+
+SELECT gen.gen_name, COUNT(eiwit.gen_id) as count 
+FROM eiwit 
+JOIN gen ON eiwit.gen_id = gen.gen_id 
+GROUP BY gen.gen_name 
+ORDER BY count DESC 
+LIMIT 1; 
+

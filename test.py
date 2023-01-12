@@ -7,7 +7,6 @@ def extractor(genbank):
     for info in genbank.splitlines():
         if "LOCUS" in info:
             eiwit_len = " ".join(info.split()[2:3])
-
         if "/chromosome" in info:
             chrom_num = info.strip().split("=")[1].strip("\"")  
             # protein_id_info_dict[protein_id]["Chromosome"].add(chrom_num)
