@@ -2,6 +2,7 @@ import psycopg2
 import datetime
 import requests
 
+
 def database_maken():
     # DB_NAME = "bpapget1_db"  # name database
     # DB_USER = "bpapget1"  # name user
@@ -30,42 +31,38 @@ def ec_getter(connection, row):
                 cur.execute("""
                     INSERT INTO reactie ("ec_nummer", reactie_naam) 
                     VALUES (%s, %s) ON CONFLICT (ec_nummer) DO NOTHING;
-                    """,
-                    (ec.strip("EC:").strip("]"), name))
+                    """, (ec.strip("EC:").strip("]"), name))
                 
                 cur.execute("""
                     INSERT INTO ec_nummer_eiwit_id ("ec_nummer", "eiwit_id") 
                     VALUES (%s, %s) ;
-                    """,
-                    (ec.strip("EC:").strip("]"), row[3]))
+                    """, (ec.strip("EC:").strip("]"), row[3]))
         if "NCBI-GeneID" in line:
             print(line.split(":")[1].strip())
         if "NCBI-ProteinID" in line:
             print(line.split(":")[1].strip())
 
+
 def appender(connection):
     cur = connection.cursor()
     with open("output.txt", "r") as f:
-        for count ,row in enumerate(f.readlines(), 1):
+        for count, row in enumerate(f.readlines(), 1):
             row = row.split(";")
 
             cur.execute("""
             INSERT INTO gen ("gen_id", "gen_name") 
             VALUES (%s, %s) ON CONFLICT (gen_id) DO NOTHING;
-            """,
-            (row[0], row[1]))
+            """, (row[0], row[1]))
 
             cur.execute("""
             INSERT INTO eiwit (eiwit_id, eiwit_naam, gen_id, chromosome, eiwit_lengte, sex_org, location_in_org) 
             VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (eiwit_id) DO NOTHING;
-            """,
-            (row[3], row[4], row[0], row[2], row[5] ,row[6], row[7]))   
+            """, (row[3], row[4], row[0], row[2], row[5], row[6], row[7]))
 
             cur.execute("""
             INSERT INTO mrna_brokstukken ("seq_id", "eiwit_id", sequentie_len ,sequentie) 
             VALUES (%s, %s, %s, %s) ON CONFLICT (seq_id) DO NOTHING;
-            """,
-            (count, row[3], int(row[8]), row[9].strip()))   
+            """, (count, row[3], int(row[8]), row[9].strip()))
 
             ec_getter(connection, row)
 
@@ -75,13 +72,14 @@ def appender(connection):
 #     cur = connection.cursor()
 #     with open("output.txt", "r") as f:
 #         for count ,row in enumerate(f.readlines()):
-                      
 #     connection.commit()
+
 
 dropper = """
     DROP TABLE IF EXISTS proteoom, eiwit, organism, gen, mrna_brokstukken, reactie ,ec_nummer_eiwit_id CASCADE;
     """
     
+
 sql = """CREATE TABLE proteoom(
     proteoom_ID VARCHAR(50) PRIMARY KEY,
     lengte INT,
@@ -138,8 +136,8 @@ sql = """CREATE TABLE proteoom(
     eiwit_id VARCHAR(20) REFERENCES eiwit(eiwit_id)
     );"""
 
+
 def main():
-    
     connection = database_maken()
     cursor = connection.cursor()
     cursor.execute(dropper)
@@ -147,5 +145,6 @@ def main():
     appender(connection)
     connection.commit()
     connection.close()
+
 
 main()
