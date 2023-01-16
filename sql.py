@@ -1,5 +1,4 @@
 import psycopg2
-import datetime
 import requests
 
 def database_maken():
