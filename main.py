@@ -9,7 +9,7 @@ from pathlib import Path
 from collections import defaultdict
 import json
 
-#change to input
+# change to input
 Entrez.email = input("mail: ")
 
 
@@ -69,9 +69,6 @@ def protein_id_to_info():
                         protein_id_info_dict[protein_id]["site type"].add(site_type)
                 output.write(f"{NCBI_gene_id};{gene_name};{chrom_num};{protein_id};{protein};{eiwit_len};{sex_};{tissue_type};{len(sequentie_lijst[0])};{sequentie_lijst.pop(0)}")
 
-
-
-
                 print(protein_id_info_dict[protein_id])
 
                 # maybe create a new method for this?
@@ -98,13 +95,9 @@ def protein_id_to_info():
                             protein_id_info_dict[protein_id]["Protein_isoforms"].add(isoform)
 
 
-
 def main():
     protein_id_to_info()
-
-
     
 
 if __name__ == '__main__':
     main()
-
