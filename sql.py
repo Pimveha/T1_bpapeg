@@ -9,6 +9,7 @@ from Bio.Blast import NCBIXML
 
 Entrez.email = "qridderpl@gmail.com"
 
+
 def database_maken():
     conn_string = """host='145.97.18.224' dbname='s1136289_db' user='s1136289' password='s1136289'"""
     connection = psycopg2.connect(conn_string)
@@ -100,10 +101,10 @@ def ec_getter(connection, row, gen_done):
                 pathway = " ".join(line.split()[2:])
             if len(pathway) > 2:
                 cur.execute("""
-                        INSERT INTO pathway_gen_id ("gen_id", pathway_name) 
-                        VALUES (%s, %s);
-                        """,
-                        (row[0], pathway)) 
+                    INSERT INTO pathway_gen_id ("gen_id", pathway_name) 
+                    VALUES (%s, %s);
+                    """,
+                    (row[0], pathway))
             if "[EC:" in line:
                 ecs = line.split("[EC:")[1].split()
                 name = " ".join(line.split("[EC:")[0].split()[2:])
@@ -121,7 +122,6 @@ def ec_getter(connection, row, gen_done):
                         (ec.strip("EC:").strip("]"), row[3]))
     gen_done.add(row[0])                 
     return gen_done
-
 
 
 def appender(connection):
@@ -200,7 +200,6 @@ def assembly_getter(naam):
     if len(lijst) == 0:
         return False
     keuze = input(f"Welke assembly wil je gebruiken? (Typ een getal tussen 1-{getal}) ")
-
 
     if lijst.get(keuze)!=None:
         output = f"{lijst[keuze]}/{lijst[keuze].split('/')[-1]}_protein.faa.gz"
