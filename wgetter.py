@@ -4,6 +4,7 @@ from Bio.Blast import NCBIXML
 
 Entrez.email = "qridderpl@gmail.com"
 
+
 def blast_seq():
     with open("T1.fa", "r") as f:
         f = f.readlines()
@@ -22,6 +23,7 @@ def blast_seq():
             organisme = " ".join(x.split()[1:])
             break
     return organisme
+
 
 def assembly_getter(naam):
     getal = 0
@@ -50,6 +52,7 @@ def assembly_getter(naam):
     else:
         return False
 
+
 def main():
     flag = False
     while flag == False:
@@ -59,5 +62,6 @@ def main():
             flag = assembly_getter(blast_seq())
         else:
             flag = assembly_getter(naam)
+
 
 main()

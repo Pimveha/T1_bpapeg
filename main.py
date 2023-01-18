@@ -98,24 +98,11 @@ def protein_id_to_info():
                             protein_id_info_dict[protein_id]["Protein_isoforms"].add(isoform)
 
 
-        # print(protein_id_info_dict)
-        # print(protein_id_info_dict.keys())
-        # print(protein_id_info_dict["XP_007655542"])
-        # print(json.dumps(protein_id_info_dict, indent=2, default=tuple))
-        return protein_id_info_dict
-
 
 def main():
-    # fasta_dict = read_fasta_file("T1.fa")
-    # # fasta_dict = read_fasta_file("T1.fa")
-    # inf1 = mRNA_py(fasta_dict)
-    # print(inf1.get_organism())
-    # print(inf1.get_organism_proteoom())
-    # # print(inf1.protein_dict())
-    # print(inf1.match_mrna_protein())
     protein_id_to_info()
 
-    # print(inf1.protein_id_to_info())
+
     
 
 if __name__ == '__main__':
